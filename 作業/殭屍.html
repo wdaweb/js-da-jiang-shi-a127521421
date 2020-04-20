@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            z-index: -999;
+        }
+
+        .background img {
+            height: 100%;
+            min-width: 100%;
+        }
+
+        #game {
+            height: 920px;
+            cursor: url(images/insecticide.png) 50 50, auto;
+            overflow: hidden;
+            position: relative;
+            /* background-color: black; */
+        }
+
+        #game>img {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+        }
+
+        #start {
+            position: absolute;
+            top: 85%;
+            left: 45%;
+            width: 100px;
+            height: 50px;
+        }
+
+        p {
+            font-size: 40px;
+            color: rgb(85, 1, 81);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background">
+        <img src="images/garden-1920x1080.jpg">
+    </div>
+    <div id="game">
+        <input type="button" value="開始遊戲" id="start">
+        <p> 分數: <span id="score">0</span> 分</p>
+        <p> 剩餘 <span id="sec">20</span> 秒</p>
+    </div>
+
+    <script src="jquery-3.5.0.min.js"></script>
+    <script>
+        // 分數
+        let score = 0;
+        // 遊戲時間
+        let sec = 20;
+        // 遊戲倒數計時
+        let gametimer = 0;
+        // 殭屍流水號
+        let zbid = 0;
+
+        const rand = (num) => {
+            return Math.round(Math.random() * num);
+        }
+        // 移動殭屍
+        const movezb = (id) => {
+            $(`#zb${id}`).animate({
+                left: rand(70) + "%",
+                top: rand(70) + "%"
+            }, 3000, function () {
+                movezb(id);
+            })
+        }
+
+        $("#start").click(function () {
+            // 停用開始按鈕
+            $(this).attr("disabled", true);
+
+            // 重設
+            score = 0;
+            $("#score").text(score);
+            sec = 20;
+            $("#sec").text(sec);
+
+            // 遊戲倒數
+            gametimer = setInterval(() => {
+                // 倒數
+                sec--;
+                $("#sec").text(sec);
+
+                //時間到
+                if (sec == 0) {
+                    // 停止計時器
+                    clearInterval(gametimer);
+                    // 啟用開始按鈕
+                    $(this).attr("disabled", false);
+                    setTimeout(() => {
+                        alert("時間到");
+                    }, 100);
+                    // 清場
+                    $("#game img").remove();
+                }
+                else {
+                    // 隨機
+                    const num = rand(10);
+                    if (num > 5) {
+                        $("#game").append(`<img src="images/cockroach.png" id="zb${zbid}">`);
+                        $(`#zb${zbid}`).css({
+                            top: rand(70) + "%",
+                            left: rand(70) + "%"
+                        })
+                        movezb(zbid);
+                        zbid++;
+                    }
+                }
+            }, 1000)
+
+            $("#game").on("click", "img", function () {
+                $(this).attr("src", "images/tombstone.png");
+                $(this).stop();
+                $(this).css("pointer-events", "none");
+                score++;
+                $("#score").text(score);
+            })
+        })
+    </script>
+</body>
+
+</html>
